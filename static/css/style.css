@@ -1,8 +1,8 @@
 :root 
 {
-            --gob-guinda: #691C32;
-            --gob-guinda-claro: #7E213B;
-            --gob-dorado: #BC955C;
+            --gob-guinda: #0e2b6e;
+            --gob-guinda-claro: #2d69f6;
+            --gob-dorado: #7aab51;
             --gob-gris: #F8F9FA;
         }
 
@@ -73,7 +73,7 @@
         }
 
         .bg-recibos { background-color: var(--gob-guinda); }
-        .bg-cedulas { background-color: #10312B; } 
+        .bg-cedulas { background-color: var(--gob-guinda); } 
 
         .card {
             border: none;
