@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="header-custom bg-recibos container-fluid mb-4">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <h1 class="h3 m-0 text-white">Consulta de Recibos</h1>
+        </div>
+        
+        <form action="/" method="GET" class="row g-3 align-items-end">
+            
+            <div class="col-6 col-md-2">
+                <label class="small text-white-50">Desde:</label>
+                <input type="date" name="desde" class="form-control" value="{{ desde }}">
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="small text-white-50">Hasta:</label>
+                <input type="date" name="hasta" class="form-control" value="{{ hasta }}">
+            </div>
+
+            <div class="col-12 col-md-4">
+                <label class="small text-white-50">Contribuyente:</label>
+                <input type="text" name="contribuyente" class="form-control" value="{{ contribuyente }}" placeholder="Nombre opcional...">
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="row g-2">
+                    <div class="col-6 col-md-4">
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Buscar</button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button type="button" class="btn w-100 text-white fw-bold" style="background-color: var(--gob-dorado);" onclick="cargarResumen()">Resumen</button>
+                    </div>
+                    
+                    <div class="col-12 col-md-4">
+                        <a href="/" class="btn btn-outline-light w-100">Ir a Hoy</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card p-3">
+                <h5>Total Neto: <span class="text-success">${{ "{:,.2f}".format(totales.total_neto|float) }}</span></h5>
+                <h6>Total Descuento: <span>${{ "{:,.2f}".format(totales.total_descuento|float) }}</span></h6>
+
+                <p class="m-0 text-muted small">Recibos: {{ recibos|length }} | <span style="color: red;">Cancelados: {{ totales.cantidad_status_1 }}</span></p>
+            </div>
+
+            <div style="display: flex; flex-direction: row; vertical-align:middle; justify-content: space-between; align-items: center; margin-top: 10px; gap: 10px;">
+                <div class="container mb-3">
+                    <div class="d-flex justify-content-end gap-2">
+                        <span class="small text-muted align-self-center">Vista en:</span>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-view-cards" onclick="switchView('cards')">
+                                🎴 Tarjetas
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-view-table" onclick="switchView('table')">
+                                📊 Tabla
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <a href="{{ API_URL }}recibos/excel?desde={{ api_desde }}&hasta={{ api_hasta }}{% if contribuyente %}&contribuyente={{ contribuyente|urlencode }}{% endif %}" 
+                    class="btn btn-outline-success btn-sm d-flex align-items-center gap-2 fw-bold">
+                        Descargar EXCEL
+                    </a>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <a href="{{ API_URL }}recibos/reporte?desde={{ api_desde }}&hasta={{ api_hasta }}{% if contribuyente %}&contribuyente={{ contribuyente|urlencode }}{% endif %}"  class="btn btn-outline-danger d-flex align-items-center gap-2">
+                        Descargar PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <div class="container">
+        <div id="container-cards" class="row">
+            {% for r in recibos %}
+            {% set es_cancelado = r.status == "1" or r.id_status == "1" %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card p-3 {{ 'opacity-50 border-cancelado' if es_cancelado else 'border-pagado' }}">
+                    
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <h6 class="fw-bold m-0" style="color: var(--gob-guinda);">Recibo: {{ r.recibo }}</h6>
+                        {% if es_cancelado %}
+                            <span class="badge bg-danger">❌ CANCELADO</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark">Folio Digital</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="mb-1"><strong>Contribuyente:</strong> {{ r.contribuyente }}</p>
+                    <p class="mb-1 text-muted small"><strong>Concepto:</strong> {{ r.concepto }}</p>
+                    
+                    <div class="row mt-2 bg-light p-2 rounded mx-0">
+                        <div class="col-6">
+                            <small class="d-block text-muted text-uppercase" style="font-size: 0.7rem;">Fecha</small>
+                            <span>{{ fmt_fecha(r.fecha) }}</span>
+                        </div>
+                        <div class="col-6 text-end">
+                            <small class="d-block text-muted text-uppercase" style="font-size: 0.7rem;">Monto Neto</small>
+                            <span class="fw-bold {{ 'text-success' if not es_cancelado else 'text-muted' }}" style="font-size: 1.1rem;">
+                                ${{ "{:,.2f}".format(r.neto|float) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 pt-2 border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="m-0 small"><strong>Forma de Pago:</strong> {{ r.forma_pago }}</p>
+                                <p class="m-0 text-danger" style="font-size: 0.8rem;">
+                                    <strong>Descuento:</strong> ${{ "{:,.2f}".format(r.descuento|float) }} ({{ r.porcentaje_descuento }}%)
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <h5 class="text-muted">No se encontraron recibos en este periodo.</h5>
+            </div>
+        {% endfor %}
+        </div>
+        <div id="container-table" class="view-hidden" style="margin-left: 5px;">
+            <div class="card shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover table-dense m-0">
+                        <thead>
+                            <tr>
+                                <th>Folio</th>
+                                <th>Fecha</th>
+                                <th>Contribuyente</th>
+                                <th>Concepto</th>
+                                <th>Monto Neto</th>
+                                <th>Forma de Pago</th>
+                                <th>Descuento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in recibos %}
+                            {% set es_cancelado = r.status == "1" or r.id_status == "1" %}
+                            <tr class="{{ 'table-danger opacity-50' if es_cancelado }}">
+                                <td class="fw-bold">{{ r.recibo }}</td>
+                                <td>{{ fmt_fecha(r.fecha) }}</td>
+                                <td>{{ r.contribuyente }}</td>
+                                <td class="small">{{ r.concepto }}</td>
+                                <td class="fw-bold text-success">${{ "{:,.2f}".format(r.neto|float) }}</td>
+                                <td>{{ r.forma_pago }}</td>
+                                <td class="text-danger">${{ "{:,.2f}".format(r.descuento|float) }} ({{ r.porcentaje_descuento }}%)</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resumenModal" tabindex="-1" aria-labelledby="resumenModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content" style="border-left: 5px solid var(--gob-dorado);">
+      <div class="modal-header" style="background-color: var(--gob-guinda); color: white;">
+        <h5 class="modal-title" id="resumenModalLabel">Despliegue de Totales</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modal-body-content">
+        <div class="text-center">
+            <div class="spinner-border text-danger" role="status"></div>
+            <p>Cargando datos...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // Si el ancho de pantalla es mayor a 768px, poner tabla por defecto
+    if (window.innerWidth >= 768) {
+        switchView('table');
+    } else {
+        switchView('cards');
+    }
+});
+</script>
+{% endblock %} 
+

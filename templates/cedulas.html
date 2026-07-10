@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="header-custom bg-cedulas container-fluid mb-4">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 m-0">Consulta de Cédulas</h1>
+        </div>
+        
+        <form action="/cedulas" method="GET" class="mt-3 row g-2">
+            <div class="row g-2">
+                <div class="col-6 col-md-3">
+                    <label class="small text-white-50">Desde:</label>
+                    <input type="date" name="desde" class="form-control" value="{{ desde }}">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="small text-white-50">Hasta:</label>
+                    <input type="date" name="hasta" class="form-control" value="{{ hasta }}">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="small text-white-50">Contribuyente:</label>
+                    <input type="text" name="contribuyente" class="form-control" value="{{ contribuyente }}" placeholder="Opcional...">
+                </div>
+                <div class="col-12 col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-light w-100 fw-bold" style="color: var(--gob-guinda);">Buscar</button>
+                    <a href="/cedulas" class="btn btn-outline-secondary w-100">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card p-3 d-flex flex-row justify-content-between align-items-center">
+                <div>
+                    <h5 class="m-0">Cédulas encontradas: <span class="fw-bold">{{ cedulas|length }}</span></h5>
+                    <p class="text-muted small m-0">Periodo: {{ fmt_fecha(api_desde) }} al {{ fmt_fecha(api_hasta) }}</p>
+                </div>
+                
+            </div>
+            <div class="d-flex justify-content-end mt-2">
+                <a href="{{ API_URL }}cedulas/reporte?desde={{ api_desde }}&hasta={{ api_hasta }}{% if contribuyente %}&contribuyente={{ contribuyente|urlencode }}{% endif %}" class="btn btn-outline-danger d-flex align-items-center gap-2">
+                    Descargar PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for c in cedulas %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card p-3">
+                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                    <h6 class="fw-bold m-0" style="color: #10312B;">Folio: {{ c.folio }}</h6>
+                    <span class="badge bg-light text-dark">Folio Electrónico: {{ c.folio_electronico or 'Sin folio' }}</span>
+                </div>
+                
+                <p class="mb-1"><strong>Contribuyente:</strong> {{ c.contribuyente }}</p>
+                <p class="mb-1 text-muted small"><strong>Dirección:</strong> {{ c.direccion or 'No especificada' }}</p>
+                <p class="mb-1"><strong>Motivo:</strong> {{ c.motivo }}</p>
+                
+                <div class="row mt-2 bg-light p-2 rounded mx-0">
+                    <div class="col-6">
+                        <small class="d-block text-muted text-uppercase" style="font-size: 0.7rem;">Fecha Cédula</small>
+                        <span>{{ fmt_fecha(c.fecham) }}</span>
+                    </div>
+                    <div class="col-6 text-end">
+                        <small class="d-block text-muted text-uppercase" style="font-size: 0.7rem;">Importe Total</small>
+                        <span class="fw-bold text-dark">${{ "{:,.2f}".format((c.precio_unitario|float * c.cantidad|float)) }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-3 pt-2 border-top">
+                    {% if c.recibo_teso %}
+                        <p class="m-0 text-success small">
+                            <strong>Recibo:</strong> {{ c.recibo_teso }} (Fecha: {{ fmt_fecha(c.fecha_rteso) }})
+                        </p>
+                    {% else %}
+                        <p class="m-0 text-danger small"><strong>Estatus:</strong> Sin Recibo</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <h5 class="text-muted">No se encontraron cédulas con los filtros seleccionados.</h5>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

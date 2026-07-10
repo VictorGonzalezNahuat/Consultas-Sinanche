@@ -1,0 +1,154 @@
+:root 
+{
+            --gob-guinda: #691C32;
+            --gob-guinda-claro: #7E213B;
+            --gob-dorado: #BC955C;
+            --gob-gris: #F8F9FA;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        footer {
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1140px; 
+            }
+        }
+
+        h1, h2, h3, .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+
+        .top-bar {
+            background-color: #0C231E;
+            height: 5px;
+            width: 100%;
+        }
+
+        .navbar {
+            border-bottom: 3px solid var(--gob-dorado);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            color: var(--gob-guinda) !important;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-link {
+            color: #545454 !important;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            margin: 0 10px;
+        }
+
+        .nav-link:hover {
+            color: var(--gob-guinda) !important;
+        }
+
+        .header-custom {
+            color: white;
+            padding: 30px 0;
+            border-bottom: 5px solid var(--gob-dorado);
+        }
+
+        .bg-recibos { background-color: var(--gob-guinda); }
+        .bg-cedulas { background-color: #10312B; } 
+
+        .card {
+            border: none;
+            border-radius: 4px;
+            border-left: 4px solid var(--gob-dorado);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .btn-success {
+            background-color: #10312B;
+            border-color: #10312B;
+        }
+
+        .btn-success:hover {
+            background-color: #1c453d;
+        }
+
+        .form-control {
+            border-radius: 2px;
+            border: 1px solid #ccc;
+        }
+
+        .form-control:focus {
+            border-color: var(--gob-guinda);
+            box-shadow: 0 0 0 0.2rem rgba(105, 28, 50, 0.25);
+        }
+
+        .gov-accent-bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--gob-color-primary) 0%, var(--gob-color-secondary) 100%);
+            width: 100%;
+        }
+
+        .border-pagado {
+            border-left: 4px solid var(--gob-guinda) !important;
+        }
+
+        .border-cancelado {
+            border-left: 4px solid #6c757d !important;
+        }
+
+        .view-hidden {
+            display: none !important;
+        }
+
+        .table-dense {
+            font-size: 0.85rem;
+        }
+        .table-dense th {
+            background-color: var(--gob-gris);
+            color: var(--gob-guinda);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+
+        .container-full-width {
+            max-width: 95% !important;
+            transition: max-width 0.3s ease-in-out;
+        }
+
+        #btn-back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none; 
+            z-index: 1000;
+            border-radius: 50%; 
+            width: 50px;
+            height: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        #btn-back-to-top:hover {
+            transform: scale(1.1);
+            background-color: var(--gob-guinda-claro);
+        }
